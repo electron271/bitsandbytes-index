@@ -186,6 +186,7 @@ jobs:
 
       - name: Commit and push changes
         run: |
+          cd repo
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
           git add .
