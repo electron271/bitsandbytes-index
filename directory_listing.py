@@ -14,6 +14,8 @@ IGNORED_FILES_AND_DIRS = [
     ".github",
     ".nojekyll",
     "directory_listing.py",
+    "permalinks.py",
+    "permalinks",
 ]
 
 

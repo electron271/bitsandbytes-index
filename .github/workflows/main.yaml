@@ -46,6 +46,9 @@ jobs:
 
       - name: Move and rename wheel
         run: |
+          # remove old files
+          rm -rf bitsandbytes/*
+
           find . -maxdepth 1 -type f -name 'bitsandbytes*manylinux*x86_64.whl' -print0 | while IFS= read -r -d '' wheel; do
             wheel_filename=$(basename "$wheel")
 
@@ -57,9 +60,11 @@ jobs:
             mv "$wheel" "bitsandbytes/${new_name}"
           done
 
-      - name: Generate Directory Listings
+      - name: Generate directory listings
         run: |
           python directory_listing.py
+
+      - name: Generate permalinks
 
       - name: Commit and push changes
         run: |
