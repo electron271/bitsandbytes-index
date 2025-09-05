@@ -25,6 +25,10 @@ jobs:
           tarBall: false
           zipBall: false
 
+      - name: Install dependencies
+        run: |
+          pip install pkginfo
+
       - name: Get package version
         shell: python
         run: |
