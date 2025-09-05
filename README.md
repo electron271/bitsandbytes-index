@@ -1,6 +1,6 @@
 # bitsandbytes-index
 
-Automated index for nightly builds of bitsandbytes.
+ROCM supported automated builds of bitsandbytes.
 
 ## Reasoning
 
