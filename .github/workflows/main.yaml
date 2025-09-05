@@ -28,8 +28,7 @@ jobs:
           zipBall: false
 
       - name: Install dependencies
-        run: |
-          pip install pkginfo
+        run: pip install pkginfo
 
       - name: Get package version
         shell: python
@@ -61,10 +60,10 @@ jobs:
           done
 
       - name: Generate directory listings
-        run: |
-          python directory_listing.py
+        run: python directory_listing.py
 
       - name: Generate permalinks
+        run: python permalinks.py
 
       - name: Commit and push changes
         run: |
