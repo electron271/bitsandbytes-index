@@ -83,9 +83,13 @@ jobs:
             echo "Using image $image"
             docker run --rm --platform "linux/$build_arch" -i \
               -w /src -v "$PWD:/src" "$image" sh -c \
-              " DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends cmake \
-                && cmake -DCOMPUTE_BACKEND=hip -DBNB_ROCM_ARCH=\"${bnb_rocm_arch}\" . \
-                && cmake --build ."
+              " sudo sed -i 's|http://archive.ubuntu.com/ubuntu/|mirror://mirrors.ubuntu.com/US.txt|g' /etc/apt/sources.list \
+              sudo sed -i 's|http://archive.ubuntu.com/ubuntu|mirror://mirrors.ubuntu.com/US.txt|g' /etc/apt/sources.list \
+              sudo sed -i 's|http://security.ubuntu.com/ubuntu/|mirror://mirrors.ubuntu.com/US.txt|g' /etc/apt/sources.list \
+              sudo sed -i 's|http://security.ubuntu.com/ubuntu|mirror://mirrors.ubuntu.com/US.txt|g' /etc/apt/sources.list \
+              DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends cmake \
+                      && cmake -DCOMPUTE_BACKEND=hip -DBNB_ROCM_ARCH=\"${bnb_rocm_arch}\" . \
+                      && cmake --build ."
           fi
 
           output_dir="output/${build_os}/${build_arch}"
