@@ -1,0 +1,158 @@
+name: Build bitsandbytes wheel
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-shared-libs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: bitsandbytes-foundation/bitsandbytes
+      - name: Build C++
+        run: bash .github/scripts/build-cpu.sh
+        env:
+          build_os: ubuntu-latest
+          build_arch: x86_64
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shared_library_ubuntu-latest_x86_64
+          path: output/*
+          retention-days: 7
+
+  build-shared-libs-rocm:
+    strategy:
+      matrix:
+        rocm_version: ["6.1.2", "6.2.4", "6.3.2", "6.4.3"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: bitsandbytes-foundation/bitsandbytes
+      - name: Set up Docker multiarch
+        uses: docker/setup-qemu-action@v3
+      - name: Build C++
+        run: |
+          declare build_arch
+          declare build_os
+          declare rocm_version
+
+          set -xeuo pipefail
+          bnb_rocm_arch="gfx90a;gfx942;gfx1100;gfx1101;gfx1201"
+          if [ "${build_os:0:6}" == ubuntu ]; then
+            image=rocm/dev-ubuntu-22.04:${rocm_version}-complete
+            echo "Using image $image"
+            docker run --rm --platform "linux/$build_arch" -i \
+              -w /src -v "$PWD:/src" "$image" sh -c \
+              "apt-get update \
+                && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends cmake \
+                && cmake -DCOMPUTE_BACKEND=hip -DBNB_ROCM_ARCH=\"${bnb_rocm_arch}\" . \
+                && cmake --build ."
+          fi
+
+          output_dir="output/${build_os}/${build_arch}"
+          mkdir -p "${output_dir}"
+          (shopt -s nullglob && cp bitsandbytes/*.{so,dylib,dll} "${output_dir}")
+        env:
+          build_os: ubuntu-latest
+          build_arch: x86_64
+          rocm_version: ${{ matrix.rocm_version }}
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shared_library_rocm_ubuntu-latest_x86_64_${{ matrix.rocm_version }}
+          path: output/*
+          retention-days: 7
+
+  build-wheels:
+    needs:
+      - build-shared-libs
+      - build-shared-libs-rocm
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: bitsandbytes-foundation/bitsandbytes
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+          pattern: "shared_library*_ubuntu-latest_x86_64*"
+          path: output/
+      - name: Copy correct platform shared library
+        shell: bash
+        run: |
+          ls -lR output/
+          cp output/ubuntu-latest/x86_64/* bitsandbytes/
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.13
+          cache: pip
+      - run: pip install build wheel
+      - run: python -m build .
+      - name: Determine and Set Platform Tag, then Tag Wheel
+        shell: bash
+        run: |
+          PLATFORM_TAG=$(python .github/scripts/set_platform_tag.py x86_64)
+          echo "PLATFORM_TAG=$PLATFORM_TAG"
+          wheel tags --remove --abi-tag=none --python-tag=py3 --platform-tag=$PLATFORM_TAG dist/bitsandbytes-*.whl
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bdist_wheel_ubuntu-latest_x86_64
+          path: dist/bitsandbytes-*.whl
+          retention-days: 7
+
+  upload-pre-release-wheels:
+    name: Create release and upload artifacts
+    runs-on: ubuntu-latest
+    needs:
+      - build-wheels
+    steps:
+      - name: Download and rename artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: tmp/
+          pattern: "bdist_wheel_*"
+          merge-multiple: true
+
+      - name: Inspect tmp directory after downloading artifacts
+        run: |
+          ls -alFR tmp/
+          WHEEL_COUNT=$(find tmp/ -type f -name "*.whl" | wc -l)
+          echo "Found $WHEEL_COUNT wheel files"
+          if [ "$WHEEL_COUNT" -eq 0 ]; then
+            echo "::error::No wheel files found in tmp directory! Cannot proceed with release."
+            exit 1
+          fi
+
+      - name: Inspect wheels directory after renaming files
+        run: ls -alFR wheels/
+
+      - uses: actions/checkout@v4
+        with:
+          path: repo
+
+      - name: Delete old files
+        run: |
+          rm -rf repo/permalinks/manual/
+
+      - name: Copy wheels to repo
+        run: |
+          mkdir -p repo/permalinks/manual/
+          mv tmp/* repo/permalinks/manual/
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git add .
+          git commit -m "Add manual wheels"
+          git push
