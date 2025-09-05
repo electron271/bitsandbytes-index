@@ -171,9 +171,6 @@ jobs:
             exit 1
           fi
 
-      - name: Inspect wheels directory after renaming files
-        run: ls -alFR wheels/
-
       - uses: actions/checkout@v4
         with:
           path: repo
