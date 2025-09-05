@@ -20,7 +20,7 @@ if not os.path.exists(f"permalinks/{sha256[:16]}/{path.name}"):
     )
 
 with open("README.md", "r") as f:
-    permalink = f"https://electron271.github.io/bitsandbytes-index/permalinks/{sha256[:16]}/{f.name}#sha256={sha256}"
+    permalink = f"https://electron271.github.io/bitsandbytes-index/permalinks/{sha256[:16]}/{path.name}#sha256={sha256}"
 
     readme = f.read()
 
