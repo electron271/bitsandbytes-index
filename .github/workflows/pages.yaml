@@ -1,3 +1,5 @@
+name: pages
+
 on:
   workflow_run:
     workflows: ["main"]
