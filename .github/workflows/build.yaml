@@ -2,6 +2,11 @@ name: Build bitsandbytes wheel
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 0 * * *"
 
 permissions:
   contents: write
@@ -107,10 +112,45 @@ jobs:
           path: output/*
           retention-days: 7
 
+  build-shared-libs-cuda:
+    strategy:
+      matrix:
+        cuda_version:
+          [
+            "11.8.0",
+            "12.0.1",
+            "12.1.1",
+            "12.2.2",
+            "12.3.2",
+            "12.4.1",
+            "12.5.1",
+            "12.6.3",
+            "12.8.1",
+            "12.9.1",
+          ]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: bitsandbytes-foundation/bitsandbytes
+      - name: Build C++
+        run: bash .github/scripts/build-cuda.sh
+        env:
+          build_os: ubuntu-24.04
+          build_arch: x86_64
+          cuda_version: ${{ matrix.cuda_version }}
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shared_library_cuda_ubuntu-24.04_x86_64_${{ matrix.cuda_version }}
+          path: output/*
+          retention-days: 7
+
   build-wheels:
     needs:
       - build-shared-libs
       - build-shared-libs-rocm
+      - build-shared-libs-cuda
 
     runs-on: ubuntu-24.04
     steps:
@@ -177,12 +217,17 @@ jobs:
 
       - name: Delete old files
         run: |
-          rm -rf repo/permalinks/manual/
+          rm -rf repo/bitsandbytes/*
 
       - name: Copy wheels to repo
         run: |
-          mkdir -p repo/permalinks/manual/
-          mv tmp/* repo/permalinks/manual/
+          mv tmp/* repo/bitsandbytes/
+
+      - name: Generate directory listings
+        run: python directory_listing.py
+
+      - name: Generate permalinks
+        run: python permalinks.py
 
       - name: Commit and push changes
         run: |
