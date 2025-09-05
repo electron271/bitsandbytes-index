@@ -222,15 +222,17 @@ jobs:
       - name: Copy wheels to repo
         run: |
           mv tmp/* repo/bitsandbytes/
-          cd repo
 
       - name: Generate directory listings
+        working-directory: repo
         run: python directory_listing.py
 
       - name: Generate permalinks
+        working-directory: repo
         run: python permalinks.py
 
       - name: Commit and push changes
+        working-directory: repo
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
