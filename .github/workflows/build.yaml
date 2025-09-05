@@ -36,6 +36,25 @@ jobs:
           repository: bitsandbytes-foundation/bitsandbytes
       - name: Set up Docker multiarch
         uses: docker/setup-qemu-action@v3
+      - name: Clean up disk space
+        run: |
+          sudo rm -rf \
+              /usr/share/dotnet \
+              /opt/ghc \
+              "/usr/local/share/boost" \
+              "$AGENT_TOOLSDIRECTORY" \
+              /opt/hostedtoolcache \
+              /opt/google/chrome \
+              /opt/microsoft/msedge \
+              /opt/microsoft/powershell \
+              /opt/pipx \
+              /usr/lib/mono \
+              /usr/local/julia* \
+              /usr/local/lib/android \
+              /usr/local/lib/node_modules \
+              /usr/local/share/chromium \
+              /usr/local/share/powershell \
+              /usr/share/swift
       - name: Build C++
         run: |
           declare build_arch
@@ -111,7 +130,7 @@ jobs:
           retention-days: 7
 
   upload-pre-release-wheels:
-    name: Create release and upload artifacts
+    name: Upload manual wheels
     runs-on: ubuntu-latest
     needs:
       - build-wheels
