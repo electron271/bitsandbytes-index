@@ -2,7 +2,7 @@ name: pages
 
 on:
   workflow_run:
-    workflows: ["main"]
+    workflows: ["Build bitsandbytes wheel"]
     types:
       - completed
   workflow_dispatch:
