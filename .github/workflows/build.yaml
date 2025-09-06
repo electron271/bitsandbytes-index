@@ -32,6 +32,7 @@ jobs:
 
   build-shared-libs-rocm:
     strategy:
+      fail-fast: false
       matrix:
         rocm_version:
           [
@@ -114,6 +115,7 @@ jobs:
 
   build-shared-libs-cuda:
     strategy:
+      fail-fast: false
       matrix:
         cuda_version:
           [
