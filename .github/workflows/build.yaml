@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: bitsandbytes-foundation/bitsandbytes
+          repository: electron271/bitsandbytes
       - name: Build C++
         run: bash .github/scripts/build-cpu.sh
         env:
@@ -53,7 +53,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: bitsandbytes-foundation/bitsandbytes
+          repository: electron271/bitsandbytes
       - name: Set up Docker multiarch
         uses: docker/setup-qemu-action@v3
       - name: Clean up disk space
@@ -132,7 +132,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: bitsandbytes-foundation/bitsandbytes
+          repository: electron271/bitsandbytes
       - name: Build C++
         run: bash .github/scripts/build-cuda.sh
         env:
@@ -156,7 +156,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: bitsandbytes-foundation/bitsandbytes
+          repository: electron271/bitsandbytes
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
