@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   build-shared-libs:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -21,12 +21,12 @@ jobs:
       - name: Build C++
         run: bash .github/scripts/build-cpu.sh
         env:
-          build_os: ubuntu-24.04
+          build_os: ubuntu-22.04
           build_arch: x86_64
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: shared_library_ubuntu-24.04_x86_64
+          name: shared_library_ubuntu-22.04_x86_64
           path: output/*
           retention-days: 7
 
@@ -50,7 +50,7 @@ jobs:
             "6.4.2",
             "6.4.3",
           ]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -85,7 +85,7 @@ jobs:
           set -xeuo pipefail
           bnb_rocm_arch="gfx90a;gfx942;gfx1100;gfx1101;gfx1201"
           if [ "${build_os:0:6}" == ubuntu ]; then
-            image=rocm/dev-ubuntu-24.04:${rocm_version}-complete
+            image=rocm/dev-ubuntu-22.04:${rocm_version}-complete
             echo "Using image $image"
             docker run --rm --platform "linux/$build_arch" -i \
               -w /src -v "$PWD:/src" "$image" sh -c \
@@ -103,13 +103,13 @@ jobs:
           mkdir -p "${output_dir}"
           (shopt -s nullglob && cp bitsandbytes/*.{so,dylib,dll} "${output_dir}")
         env:
-          build_os: ubuntu-24.04
+          build_os: ubuntu-22.04
           build_arch: x86_64
           rocm_version: ${{ matrix.rocm_version }}
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: shared_library_rocm_ubuntu-24.04_x86_64_${{ matrix.rocm_version }}
+          name: shared_library_rocm_ubuntu-22.04_x86_64_${{ matrix.rocm_version }}
           path: output/*
           retention-days: 7
 
@@ -130,7 +130,7 @@ jobs:
             "12.8.1",
             "12.9.1",
           ]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -138,13 +138,13 @@ jobs:
       - name: Build C++
         run: bash .github/scripts/build-cuda.sh
         env:
-          build_os: ubuntu-24.04
+          build_os: ubuntu-22.04
           build_arch: x86_64
           cuda_version: ${{ matrix.cuda_version }}
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: shared_library_cuda_ubuntu-24.04_x86_64_${{ matrix.cuda_version }}
+          name: shared_library_cuda_ubuntu-22.04_x86_64_${{ matrix.cuda_version }}
           path: output/*
           retention-days: 7
 
@@ -154,7 +154,7 @@ jobs:
       - build-shared-libs-rocm
       - build-shared-libs-cuda
 
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -163,13 +163,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           merge-multiple: true
-          pattern: "shared_library*_ubuntu-24.04_x86_64*"
+          pattern: "shared_library*_ubuntu-22.04_x86_64*"
           path: output/
       - name: Copy correct platform shared library
         shell: bash
         run: |
           ls -lR output/
-          cp output/ubuntu-24.04/x86_64/* bitsandbytes/
+          cp output/ubuntu-22.04/x86_64/* bitsandbytes/
       - name: Set up Python 3.13
         uses: actions/setup-python@v5
         with:
@@ -186,13 +186,13 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: bdist_wheel_ubuntu-24.04_x86_64
+          name: bdist_wheel_ubuntu-22.04_x86_64
           path: dist/bitsandbytes-*.whl
           retention-days: 7
 
   upload-pre-release-wheels:
     name: Upload manual wheels
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     needs:
       - build-wheels
     steps:
