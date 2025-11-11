@@ -11,7 +11,7 @@ ROCM supported automated builds of bitsandbytes.
 ## Latest Version Permalink
 
 <!-- permalinks.py START -->
-**Permalink**: https://electron271.github.io/bitsandbytes-index/permalinks/9e982f55b8ffe68e/bitsandbytes-0.49.0.dev0-py3-none-manylinux_2_24_x86_64.whl#sha256=9e982f55b8ffe68ecc191885efc5a51831d35f7cfdf5a45764921142536f2b38
+**Permalink**: https://electron271.github.io/bitsandbytes-index/permalinks/0fd83d4746498ebb/bitsandbytes-0.49.0.dev0-py3-none-manylinux_2_24_x86_64.whl#sha256=0fd83d4746498ebb5ca6cf834fa4b5932e03448d889ff2f09742346c60f69fc9
 <!-- permalinks.py END -->
 
 # If bitsandbytes either makes their own index, fixes the wheel format, or builds wheels with ROCM support open an issue.
